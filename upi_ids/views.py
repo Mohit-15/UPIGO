@@ -1,16 +1,13 @@
-from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     permission_classes,
-    renderer_classes,
     authentication_classes,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.manager import TokenAuthentication
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from rest_framework import schemas, response
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from accounts.models import User
@@ -58,6 +55,23 @@ def create_upi(request, format=None):
 	serializer = UpiSerializer(data=request_data)
 	if serializer.is_valid():
 		serializer.save()
+		subject = "[IMP] UPI ID Created for - {}".format(auth_user.name)
+        message = render_to_string(
+            "upi_id/confirmation_mail.html",
+            {
+                "user": auth_user,
+                "upi_id": request_data["upi_id"],
+                "upi_pin": data["pin1"],
+                "qrcode": serializer.data['scan_code']
+            },
+        )
+        send_mail(
+            subject,
+            message,
+            "msbproject1234@gmail.com",
+            [auth_user.email],
+            fail_silently=False,
+        )
 		return Response(serializer.data, status=status.HTTP_201_CREATED)
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

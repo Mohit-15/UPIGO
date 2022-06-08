@@ -1,0 +1,17 @@
+
+{% autoescape off %}
+Hi {{ user.name }},
+
+Thanks for getting started with our UPI portal!
+Congratulations!! Your UPI account has been opened. Now you can use your UPI ID and pin to transfer/recieve funds.
+
+Your UPI Credentials are given below:
+UPI ID: {{upi_id}}
+UPI Password: {{upi_pin}}
+
+QR Code Download Link: {{qrcode}}
+
+Thank you & Regards,
+Team UPI GO
+
+{% endautoescape %}
