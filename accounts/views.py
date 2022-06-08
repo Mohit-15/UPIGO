@@ -75,7 +75,7 @@ def verify_mobile(request, format=None):
             {"message": "Verification OTP Expired"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    print(session_otp)
+    #print(session_otp)
     input_otp = request.POST.get('otp', '')
     if user.mobile_verified: 
         return Response(
@@ -103,13 +103,13 @@ def generate_otp(request, format=None):
 
     random_otp = randint(100000, 999999)
     request.META['HTTP_VERIFICATION_OTP'] = random_otp
-    print(request.META['HTTP_VERIFICATION_OTP'])
+    #print(request.META['HTTP_VERIFICATION_OTP'])
     message = client.messages.create(
         body='Hi there! Your One Time Password for you mobile verification is {}. This OTP is valid for only 2 minutes'.format(random_otp),
         from_= os.environ.get('TWILIO_NUMBER'),
         to = '+91{}'.format(request.user.mobile_no)
     )
-    print(message.sid)
+    #print(message.sid)
     return Response(
             {"message": "Verification OTP send to your registered Mobile Number."}, status=status.HTTP_200_OK
         )
@@ -122,7 +122,7 @@ def add_details(request, format=None):
     auth_user = User.objects.get(email=request.user.email)
     data = JSONParser().parse(request)
     data["user"] = auth_user.id
-    print(data)
+    #print(data)
     serializer = UserDetailProfile(data=data)
     if serializer.is_valid():
         serializer.save()
