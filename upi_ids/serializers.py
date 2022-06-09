@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.serializers import UserDetailProfile, UserSignUpSerializer
+from accounts.serializers import UserSignUpSerializer
 from django.contrib.auth.password_validation import validate_password
 from .models import UPI
 

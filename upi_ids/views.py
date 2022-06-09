@@ -56,22 +56,22 @@ def create_upi(request, format=None):
 	if serializer.is_valid():
 		serializer.save()
 		subject = "[IMP] UPI ID Created for - {}".format(auth_user.name)
-        message = render_to_string(
-            "upi_id/confirmation_mail.html",
-            {
-                "user": auth_user,
-                "upi_id": request_data["upi_id"],
-                "upi_pin": data["pin1"],
-                "qrcode": serializer.data['scan_code']
-            },
-        )
-        send_mail(
-            subject,
-            message,
-            "msbproject1234@gmail.com",
-            [auth_user.email],
-            fail_silently=False,
-        )
+		message = render_to_string(
+			"upi_id/confirmation_mail.html",
+			{
+				"user": auth_user,
+				"upi_id": request_data["upi_id"],
+				"upi_pin": data["pin1"],
+				"qrcode": serializer.data['scan_code']
+			},
+		)
+		send_mail(
+			subject,
+			message,
+			"msbproject1234@gmail.com",
+			[auth_user.email],
+			fail_silently=False,
+		)
 		return Response(serializer.data, status=status.HTTP_201_CREATED)
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
