@@ -4,8 +4,14 @@ from passlib.hash import pbkdf2_sha256
 from io import BytesIO
 from django.core.files import File
 from PIL import Image, ImageDraw
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv, find_dotenv
 import qrcode
+import os
 
+
+load_dotenv(find_dotenv())
+fernet = Fernet(os.environ.get('ENC_KEY').encode())
 
 # Create your models here.
 class UPI(models.Model):
@@ -21,11 +27,13 @@ class UPI(models.Model):
 	def __str__(self):
 		return self.username.mobile_no
 
+
 	def save(self, *args, **kwargs):
 		if not self.scan_code:
-			encrypted_upi = pbkdf2_sha256.encrypt(self.upi_id, rounds=12000, salt_size=32) + "@upigo"
+			upiID = self.upi_id.split('@')[0]
+			encrypted_upi = fernet.encrypt(upiID.encode()).decode()[9:-2] + "@upigo"
 			upi_qrcode = qrcode.make(encrypted_upi)
-			canvas = Image.new('RGB', (520,520), 'white')
+			canvas = Image.new('RGB', (500,500), 'white')
 			draw = ImageDraw.Draw(canvas)
 			canvas.paste(upi_qrcode)
 			file_name = f'qrcode-{self.username.mobile_no}'+'.png'

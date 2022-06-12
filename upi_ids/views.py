@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     permission_classes,
-    authentication_classes,
+    authentication_classes
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.manager import TokenAuthentication
@@ -13,11 +13,14 @@ from django.core.mail import send_mail
 from accounts.models import User
 from .serializers import UpiSerializer, UpiDetailSerializer
 from .models import UPI
-from accounts.token import account_activation_token
-from django.utils.encoding import force_text
-from django.utils.http import urlsafe_base64_decode
 from passlib.hash import pbkdf2_sha256
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv, find_dotenv
+import os
 
+
+load_dotenv(find_dotenv())
+fernet = Fernet(os.environ.get('ENC_KEY').encode())
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -133,8 +136,26 @@ def show_upi_detail(request, format=None):
 	except UPI.DoesNotExist:
 		return Response({
 				"Error": "No UPI Profile created for this account."
-			}, status=status.HTTP_400_BAD_REQUEST)
+			}, status=status.HTTP_404_NOT_FOUND)
 
 	serializer = UpiDetailSerializer(upi_profile, many=True)
 	return Response(serializer.data, status=status.HTTP_200_OK)
-	
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def scan_qr_code(request, format=None):
+	code = os.environ.get('PREFIX') + request.data['qr_code'][:-6] + os.environ.get('SUFFIX') + request.data['qr_code'][-6:]
+	print(code)
+	decoded_upi = fernet.decrypt(code.encode()).decode()
+	try:
+		upi_account = UPI.objects.get(upi_id=decoded_upi+"@upigo")
+	except UPI.DoesNotExist:
+		return Response({
+				"Error": "No UPI Details found."
+			}, status=status.HTTP_404_NOT_FOUND)
+
+	serializer = UpiDetailSerializer(upi_account)
+	return Response(serializer.data, status=status.HTTP_200_OK)
+
