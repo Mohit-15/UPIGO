@@ -329,3 +329,18 @@ This API will show the details of the Logged In user's UPI Details like this:
 	    }
 	]
 
+### Scan QR Code API
+
+    POST: http://127.0.0.1:8000/api/user/upi/scanQRCode/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "qr_code": "<qr_code>"
+    }
+    
+This API will fetch the text written in the QRCode, decodes it and find the matching UPI object from the Database, and returns the details, else returns the error saying **"No UPI Details found"** with **404** status code.
+The encoded text in the QR Code will look like this:
+
+> hkgfmiSk9-yzVjM_d2cFJkkbat9MarPPZCzWaxm_i8gLZOSOHhUKZvezH3e1s8M8bisllOXIG-ZkeH7viEWUIKkcA@upigo
+
+Which is then decoded and converted into ***xxxxxxxxxx@upigo***.  For encoding & decoding, I've used ***Symmetric Key Cryptography***.
