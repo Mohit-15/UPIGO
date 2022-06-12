@@ -29,6 +29,8 @@ These are the operations which I have added to the User Account Application.
 > - **showUserDetails**
 > - **addMoneyToWallet**
 
+### Create User API
+
     POST: https://127.0.0.1:8000/api/user/createUser/
     body: 
     {
@@ -39,6 +41,8 @@ These are the operations which I have added to the User Account Application.
 	    "password2": "<confirm_password>"
     }
 I've taken Mobile Number as the username for authentication. When the user creation is successful, a user account object will be created in the database, and a email verification mail will be automatically sent to the user registered email, which contains the email verification link.
+
+### Login User API
 
     POST: https://127.0.0.1:8000/api/user/loginUser/
     body: 
@@ -53,6 +57,8 @@ When the user logins with correct credentials, a response will be generated with
     }
 Whenever a user needs to make a request which needs authentication, then user can paste this token in the ***AUTHENTICATION HEADER***.
 
+### Add User Details API
+
     POST: https://127.0.0.1:8000/api/user/addUserDetails/
     headers: {"bearer": <authentication_token>}
     body: 
@@ -66,10 +72,13 @@ Whenever a user needs to make a request which needs authentication, then user ca
     }
 This API will create a **UserDetail** object in the database with logged in user as the user, and return all the details in the response with a **201** Created status code.
 
+### Edit User Details API
+
     PATCH: https://127.0.0.1:8000/api/user/editUserDetails/
     headers: {"Bearer": <authentication_token>}
 This end point is used to edit the existing user details, and returns the updated UserDetail object in the response.
 
+### Add Money to Account Wallet API
 
     POST: https://127.0.0.1:8000/api/user/addMoneyToWallet/
     headers: {"Bearer": <authentication_token>}
@@ -84,10 +93,13 @@ This end point is used to edit the existing user details, and returns the update
 
 This request will add the money to the respective **userDetail** object for making the transactions.
 
+### Generate OTP for Registered Mobile number verification API
+
     GET: https://127.0.0.1:8000/api/user/generateOTP/
     headers: {"Bearer": <authentication_token>}
 This request will fetch the user registered mobile number and sends an OTP via SMS, and also put the same OTP in the ***"VERIFICATION_OTP"*** header. For sending SMS, I'm using **Twilio APIs**.
 
+### Verify Mobile Number API
 
     POST: http://127.0.0.1:8000/api/user/verifyMobileNumber/
     headers: {"Bearer": <authentication_token>}
