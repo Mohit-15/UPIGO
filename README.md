@@ -57,6 +57,12 @@ When the user logins with correct credentials, a response will be generated with
     }
 Whenever a user needs to make a request which needs authentication, then user can paste this token in the ***AUTHENTICATION HEADER***.
 
+### Logout User API
+
+    GET: https://127.0.0.1:8000/api/user/logoutUser/
+    headers: {"bearer": <authentication_token>}
+This endpoint will delete the **AUTHENTICATION TOKEN** object from the database, and logs out the user from the session. Whenever the same user logins, a new **TOKEN** will be generated and a new object is created in the TOKENS model.
+
 ### Add User Details API
 
     POST: https://127.0.0.1:8000/api/user/addUserDetails/
@@ -77,6 +83,26 @@ This API will create a **UserDetail** object in the database with logged in user
     PATCH: https://127.0.0.1:8000/api/user/editUserDetails/
     headers: {"Bearer": <authentication_token>}
 This end point is used to edit the existing user details, and returns the updated UserDetail object in the response.
+
+### Show User Details API
+
+    GET: https://127.0.0.1:8000/api/user/showUserDetails/
+    headers: {"Bearer": <authentication_token>}
+    Response: 
+    {
+	    "user": {
+	        "email": "xxxxxxxxx@gmail.com",
+	        "name": "Mohit Gupta",
+	        "mobile_no": "xxxxxxxxxx"
+	    },
+	    "age": 22,
+	    "gender": "Male",
+	    "date_of_birth": "2000-04-15",
+	    "address": "xxxx, xxxx xxxx xxxx.",
+	    "aadhar_number": null,
+	    "pan_card": null,
+	    "account_balance": 530
+    }
 
 ### Add Money to Account Wallet API
 
@@ -108,3 +134,105 @@ This request will fetch the user registered mobile number and sends an OTP via S
 	    "otp": <enter_otp_send_via_sms>
     }
 This request will compare the OTPs in the **"VERIFICATION_OTP"** and the request body. If the OTPs match it will make the is_active boolean field **"TRUE"**, else return the error.
+
+## Transactions Application
+The base url for user APIs starts with
+
+    https://127.0.0.1:8000/api/user/transactions/
+    
+This application handles Endpoints related to the transactions. These are the operations which I have added to the Transaction Application.
+
+> * viewTransactions
+> * makeTransaction
+> * debitHistory
+> * creditHistory
+
+### View All Transactions API
+
+    GET: https://127.0.0.1:8000/api/user/transactions/viewTransactions/
+    headers: {"Bearer": <authentication_token>}
+    Response Body: 
+    [
+	    {
+	        "user": {
+	            "email": "xxxxxxxx@gmail.com",
+	            "name": "Mohit Gupta",
+	            "mobile_no": "xxxxxxxxx"
+	        },
+	        "transaction_id": "8c646a2c-f930-4420-9c58-7a9d6e52e754",
+	        "transfer_to": "8447851925@upigo",
+	        "received_from": null,
+	        "amount": "-10",
+	        "not_pending": true,
+	        "is_credit": false,
+	        "done_on": "2022-06-09T18:39:01.019706+05:30"
+	    },
+	    {
+	        "user": {
+	            "email": "xxxxxxxxx@gmail.com",
+	            "name": "Mohit Gupta",
+	            "mobile_no": "xxxxxxxxx"
+	        },
+	        "transaction_id": "7ec4167e-41dc-494c-9132-33e540145214",
+	        "transfer_to": null,
+	        "received_from": "8447851925@upigo",
+	        "amount": "+20",
+	        "not_pending": true,
+	        "is_credit": true,
+	        "done_on": "2022-06-09T18:56:21.314813+05:30"
+	    }
+	]
+	
+The response body contains an **ARRAY** of transactions. The response body clearly shows which is a debit transaction and which is a credit transaction.  Whenever the logged in user receives money from someone, the is_credit field becomes TRUE, and the received from field will be field with the receiver's UPI Id. 
+If it is the debit transaction, the amount will have the prefix **"-"**, and the transfer_to field will be filled.
+### Make Transaction API
+
+    POST: http://127.0.0.1:8000/api/user/transactions/makeTransaction/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+		"transfer_to": "xxxxxxxxxxx@upigo",
+		"amount": 10,
+		"password": "xxxxxx"
+	}
+	
+This endpoint requires three values, the upi_id of receiver, amount, and the UPI password. After successful transaction, the response body will look like this: 
+
+> VALIDATION CHECKS BEFORE MAKING ANY TRANSACTION
+> * For Making a transaction, user first needs to verify its mobile number, then only the user can successfully make any transaction.
+> * Receiver's UPI ID should exist and active.
+> * User wallet balance should not be zero.
+> * Checks entered UPI PIN is correct or not.
+
+    {
+	    "transaction_id": "2343b7f7-e0bf-4b61-b51b-1f33ca7db132",
+	    "transfer_to": "xxxxxxxxxxx@upigo",
+	    "received_from": null,
+	    "amount": "-10",
+	    "is_credit": false,
+	    "not_pending": true,
+	    "done_on": "2022-06-12T20:23:27.187501+05:30",
+	    "user": 1
+	}
+	
+After successful transaction, the SMS will also be sent to the registered mobile numbers of the sender, and the receiver. The SMS will look like this: 
+
+> Hello Mohit Gupta, Rs. 10 has been debited from your account to xxxxxxxxxxx@upigo.
+> 
+> The transaction id for this transaction is : 2343b7f7-e0bf-4b61-b51b-1f33ca7db132.
+> 
+> Thank you for using UPI GO.
+
+### Debit History API
+
+    GET: http://127.0.0.1:8000/api/user/transactions/debitHistory/
+    headers: {"Bearer": <authentication_token>}
+    
+This endpoint will return an **ARRAY** of transactions, which include all the debited transactions from the User's Account.
+
+### Credit History API
+
+    GET: http://127.0.0.1:8000/api/user/transactions/creditHistory/
+    headers: {"Bearer": <authentication_token>}
+    
+This endpoint will return an **ARRAY** of transactions, which include all the credited transactions to the User's Account.
