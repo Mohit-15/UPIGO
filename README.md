@@ -306,3 +306,26 @@ This endpoint will take two fields **PIN1** and **PIN2**. This will change the p
 	}
 	
 This endpoint will change the **UPI ID** associated with the logged in user account.
+
+### Show UPI Details API
+
+    GET: http://127.0.0.1:8000/api/user/upi/showUpiDetails/
+    headers: {"Bearer": <authentication_token>}
+    
+This API will show the details of the Logged In user's UPI Details like this:
+
+    [
+	    {
+		    "username": {
+			    "email": "xxxxxxxxxxx@gmail.com",
+			    "name": "Mohit Gupta",
+			    "mobile_no": "xxxxxxxxxxx"
+		    },
+		    "upi_id": "xxxxxxxxxxx@upigo",
+		    "created_at": "2022-06-08T22:30:16.185558+05:30",
+		    "updated_at": "2022-06-12T22:28:25.667376+05:30",
+		    "scan_code": "/media/upi/qr_codes/qrcode-xxxxxxxxxxx.png",
+		    "is_active": true
+	    }
+	]
+
