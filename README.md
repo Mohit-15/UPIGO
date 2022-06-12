@@ -89,3 +89,10 @@ This request will add the money to the respective **userDetail** object for maki
 This request will fetch the user registered mobile number and sends an OTP via SMS, and also put the same OTP in the ***"VERIFICATION_OTP"*** header. For sending SMS, I'm using **Twilio APIs**.
 
 
+    POST: http://127.0.0.1:8000/api/user/verifyMobileNumber/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "otp": <enter_otp_send_via_sms>
+    }
+This request will compare the OTPs in the **"VERIFICATION_OTP"** and the request body. If the OTPs match it will make the is_active boolean field **"TRUE"**, else return the error.
