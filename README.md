@@ -71,3 +71,21 @@ This API will create a **UserDetail** object in the database with logged in user
 This end point is used to edit the existing user details, and returns the updated UserDetail object in the response.
 
 
+    POST: https://127.0.0.1:8000/api/user/addMoneyToWallet/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "amount": <Integer_value>
+    }
+
+> For now, I've taking the amount value from the form, but in future I'm
+> planning to integrate **Paytm/Razorpay** gateway for adding the money
+> to wallet.
+
+This request will add the money to the respective **userDetail** object for making the transactions.
+
+    GET: https://127.0.0.1:8000/api/user/generateOTP/
+    headers: {"Bearer": <authentication_token>}
+This request will fetch the user registered mobile number and sends an OTP via SMS, and also put the same OTP in the ***"VERIFICATION_OTP"*** header. For sending SMS, I'm using **Twilio APIs**.
+
+
