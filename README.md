@@ -15,6 +15,7 @@ As the name implies, User Account application handles all the user registration,
 The base url for user APIs starts with
 
     https://127.0.0.1:8000/api/user
+    
 In this application, we have used ***Token Authentication***, in which whenever a existing user logins with the correct credentials, then a JWT Token is created, which can be used to authorize the user request.
 
 These are the operations which I have added to the User Account Application.
@@ -40,6 +41,7 @@ These are the operations which I have added to the User Account Application.
 	    "password1": "<password>",
 	    "password2": "<confirm_password>"
     }
+    
 I've taken Mobile Number as the username for authentication. When the user creation is successful, a user account object will be created in the database, and a email verification mail will be automatically sent to the user registered email, which contains the email verification link.
 
 ### Login User API
@@ -61,6 +63,7 @@ Whenever a user needs to make a request which needs authentication, then user ca
 
     GET: https://127.0.0.1:8000/api/user/logoutUser/
     headers: {"bearer": <authentication_token>}
+    
 This endpoint will delete the **AUTHENTICATION TOKEN** object from the database, and logs out the user from the session. Whenever the same user logins, a new **TOKEN** will be generated and a new object is created in the TOKENS model.
 
 ### Add User Details API
@@ -76,12 +79,14 @@ This endpoint will delete the **AUTHENTICATION TOKEN** object from the database,
 	    "aadhar_number": "<aadhar_number>",
 	    "pan_card": "<pan_card_number>"
     }
+    
 This API will create a **UserDetail** object in the database with logged in user as the user, and return all the details in the response with a **201** Created status code.
 
 ### Edit User Details API
 
     PATCH: https://127.0.0.1:8000/api/user/editUserDetails/
     headers: {"Bearer": <authentication_token>}
+    
 This end point is used to edit the existing user details, and returns the updated UserDetail object in the response.
 
 ### Show User Details API
@@ -123,6 +128,7 @@ This request will add the money to the respective **userDetail** object for maki
 
     GET: https://127.0.0.1:8000/api/user/generateOTP/
     headers: {"Bearer": <authentication_token>}
+    
 This request will fetch the user registered mobile number and sends an OTP via SMS, and also put the same OTP in the ***"VERIFICATION_OTP"*** header. For sending SMS, I'm using **Twilio APIs**.
 
 ### Verify Mobile Number API
@@ -133,6 +139,7 @@ This request will fetch the user registered mobile number and sends an OTP via S
     {
 	    "otp": <enter_otp_send_via_sms>
     }
+    
 This request will compare the OTPs in the **"VERIFICATION_OTP"** and the request body. If the OTPs match it will make the is_active boolean field **"TRUE"**, else return the error.
 
 ## Transactions Application
@@ -236,3 +243,66 @@ This endpoint will return an **ARRAY** of transactions, which include all the de
     headers: {"Bearer": <authentication_token>}
     
 This endpoint will return an **ARRAY** of transactions, which include all the credited transactions to the User's Account.
+
+## UPI Application
+
+The base url for user APIs starts with
+
+    https://127.0.0.1:8000/api/user/upi
+
+> For now, I've made **One-to-One** Relation with the UPI object and the USER account. Means for one user, only one UPI ID is created.
+
+This application handles Endpoints related to the UPI. These are the operations which I have added to the UPI Application.
+
+> * createUpi
+> * changeUpiID
+> * changeUpiPin
+> * deactivateUpi
+> * showUpiDetails
+> * reactivateUPI
+> * scanQRCode
+
+### Create UPI ID
+
+    POST: http://127.0.0.1:8000/api/user/upi/createUpi/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "set_default": <0/1>,
+	    "upi_id": "<custom_upi_ID>",
+	    "pin1": "<upi_pin>",
+	    "pin2": "<confirm_upi_pin>"
+	}
+    
+In this API, I've provided two options for the users to choose their UPI ID. They can either set the default UPI ID i.e. "mobile_no@upigo" or the custom upi ID of their choice only by setting the **"set_default"** field with **0 or 1**.
+
+> I've set one Validation for creating the UPI ID.
+> * User first needs to verify their mobile number to create the UPI ID.
+
+After successful creation of **UPI** object, an **QRCode** will also be created, which stores the **ENCODED UPI ID**. This QRCode can be used to make payments through scanning the code. 
+
+<img src="https://i.imgur.com/OJjYIbW.png" alt="Example QR Code" width="400"/>
+
+### Change UPI PIN API
+
+    POST: http://127.0.0.1:8000/api/user/upi/changeUpiPin/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "pin1": "<upi_pin>",
+	    "pin2": "<confirm_upi_pin>"
+	}
+	
+This endpoint will take two fields **PIN1** and **PIN2**. This will change the password of the UPI ID associated with the logged in user account.
+
+### Change UPI ID API
+
+    POST: http://127.0.0.1:8000/api/user/upi/changeUpiID/
+    headers: {"Bearer": <authentication_token>}
+    body: 
+    {
+	    "upi_id": "<new_upi_id>",
+	    "password": "<upi_pin>"
+	}
+	
+This endpoint will change the **UPI ID** associated with the logged in user account.
