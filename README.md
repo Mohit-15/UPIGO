@@ -160,7 +160,7 @@ This application handles Endpoints related to the transactions. These are the op
 	            "mobile_no": "xxxxxxxxx"
 	        },
 	        "transaction_id": "8c646a2c-f930-4420-9c58-7a9d6e52e754",
-	        "transfer_to": "8447851925@upigo",
+	        "transfer_to": "xxxxxxxxxxx@upigo",
 	        "received_from": null,
 	        "amount": "-10",
 	        "not_pending": true,
@@ -175,7 +175,7 @@ This application handles Endpoints related to the transactions. These are the op
 	        },
 	        "transaction_id": "7ec4167e-41dc-494c-9132-33e540145214",
 	        "transfer_to": null,
-	        "received_from": "8447851925@upigo",
+	        "received_from": "xxxxxxxxxxx@upigo",
 	        "amount": "+20",
 	        "not_pending": true,
 	        "is_credit": true,
