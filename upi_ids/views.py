@@ -25,7 +25,7 @@ fernet = Fernet(os.environ.get('ENC_KEY').encode())
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def test(request, format=None):
-	data = {"message": "This is the Testing Page."}
+	data = {"message": "UPI APIs Working."}
 	return Response(data, status=status.HTTP_200_OK)
 
 
@@ -79,7 +79,7 @@ def create_upi(request, format=None):
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(['PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def change_upi_pin(request, format=None):
@@ -109,6 +109,42 @@ def change_upi_pin(request, format=None):
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def change_upi_id(request, format=None):
+	auth_user = User.objects.get(email=request.user.email)
+	try:
+		upi_profile = UPI.objects.get(username=auth_user.id)
+	except UPI.DoesNotExist:
+		return Response({
+				"Error": "UPI Profile doesn't exist for this account. Please create a new UPI ID."
+			}, status=status.HTTP_400_BAD_REQUEST)
+
+	request_data = {}
+	data = JSONParser().parse(request)
+	print(data)
+	request_data["username"] = auth_user.id
+	request_data["upi_id"] = data["upi_id"]
+	request_data["upi_pin"] = upi_profile.upi_pin
+	if not pbkdf2_sha256.verify(data["upi_pin"], upi_profile.upi_pin):
+		return Response({
+				"Error": "UPI Pin is Incorrect. Please correct the error."
+			}, status=status.HTTP_400_BAD_REQUEST)
+
+	qrcode_path = "." + upi_profile.scan_code.url
+	if os.path.exists(qrcode_path):
+		os.remove(qrcode_path)
+
+	serializer = UpiSerializer(upi_profile, data=request_data)
+	if serializer.is_valid():
+		serializer.save()
+		print(serializer.validated_data)
+		UPI.objects.get(upi_id=serializer.validated_data['upi_id']).scan_code.delete(save=True)
+		return Response(serializer.data, status=status.HTTP_200_OK)
+	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -124,6 +160,23 @@ def deactivate_upi(request, format=None):
 	upi_profile.is_active = False
 	upi_profile.save()
 	return Response({"Message": "UPI ID successfully Deactivated"}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def reactivate_upi(request, format=None):
+	auth_user = User.objects.get(email=request.user.email)
+	try:
+		upi_profile = UPI.objects.get(username=auth_user.id)
+	except UPI.DoesNotExist:
+		return Response({
+				"Error": "UPI Profile doesn't exist for this account. Please create a new UPI ID."
+			}, status=status.HTTP_400_BAD_REQUEST)
+
+	upi_profile.is_active = True
+	upi_profile.save()
+	return Response({"Message": "UPI ID successfully Reactivated"}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -147,8 +200,8 @@ def show_upi_detail(request, format=None):
 @permission_classes([IsAuthenticated])
 def scan_qr_code(request, format=None):
 	code = os.environ.get('PREFIX') + request.data['qr_code'][:-6] + os.environ.get('SUFFIX') + request.data['qr_code'][-6:]
-	print(code)
 	decoded_upi = fernet.decrypt(code.encode()).decode()
+	print(decoded_upi)
 	try:
 		upi_account = UPI.objects.get(upi_id=decoded_upi+"@upigo")
 	except UPI.DoesNotExist:

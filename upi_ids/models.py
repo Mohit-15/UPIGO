@@ -1,6 +1,5 @@
 from django.db import models
 from accounts.models import User
-from passlib.hash import pbkdf2_sha256
 from io import BytesIO
 from django.core.files import File
 from PIL import Image, ImageDraw
