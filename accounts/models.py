@@ -9,8 +9,6 @@ from django.template.loader import render_to_string
 from .token import account_activation_token
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.contrib.sites.models import Site
-from django.utils import timezone
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
@@ -54,16 +52,20 @@ class UserDetail(models.Model):
         ("Trans-gender", "Trans-gender"),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, default=None, on_delete=models.CASCADE)
     age = models.IntegerField(blank=True, null=True)
     gender = models.CharField(
         choices=GENDER_CHOICES, max_length=50, blank=True, null=True
     )
     date_of_birth = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=100, blank=True, null=True)
+    aadhar_number = models.CharField(max_length=15, blank=True, null=True)
+    pan_card = models.CharField(max_length=13, blank=True, null=True)
+    account_balance = models.IntegerField(default=0)
+
 
     def __str__(self):
-        return self.user.email
+        return self.user.mobile_no
 
 
 @receiver(post_save, sender=User)

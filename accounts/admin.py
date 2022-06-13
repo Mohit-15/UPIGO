@@ -40,6 +40,9 @@ class UserChangeForm(forms.ModelForm):
             "age",
             "date_of_birth",
             "address",
+            "aadhar_number",
+            "pan_card",
+            "account_balance",
         )
 
     def clean_password(self):
@@ -80,14 +83,13 @@ class UserAdmin(BaseUserAdmin):
 class UserDetailAdmin(BaseUserAdmin):
     model = UserDetail
 
-    list_display = ("user", "age", "gender", "date_of_birth")
+    list_display = ("user", "age", "aadhar_number", "pan_card", "account_balance")
     list_filter = ("user", "gender")
     fieldsets = (
         (None, {"fields": ("user",)}),
-        (
-            "Personal Information",
-            {"fields": ("age", "gender", "date_of_birth", "address")},
-        ),
+        ("Personal Information", {"fields": ("age", "gender", "date_of_birth", "address",)}),
+        ("Identity Details", {"fields": ("aadhar_number", "pan_card",)}),
+        ("Account Details", {"fields": ("account_balance",)})
     )
     search_fields = ("user",)
     ordering = ("user",)

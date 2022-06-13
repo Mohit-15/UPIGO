@@ -1,9 +1,7 @@
-from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     permission_classes,
-    renderer_classes,
     authentication_classes,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,7 +9,6 @@ from .serializers import UserSignUpSerializer, UserSerializer, UserDetailProfile
 from accounts.manager import TokenAuthentication
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from rest_framework import schemas, response
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from accounts.models import User, UserDetail
@@ -48,8 +45,8 @@ def user_signup(request, format=None):
 
 
 @api_view(["GET"])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def logout_user(request, format=None):
     try:
         request.user.auth_token.delete()
@@ -68,7 +65,7 @@ def logout_user(request, format=None):
 @permission_classes([IsAuthenticated])
 def verify_mobile(request, format=None):
     try:
-        session_otp = request.META.get('HTTP_VERIFICATION_OTP')
+        session_otp = int(request.META.get('HTTP_VERIFICATION_OTP'))
         user = request.user
     except:
         return Response(
@@ -76,7 +73,7 @@ def verify_mobile(request, format=None):
         )
 
     #print(session_otp)
-    input_otp = request.POST.get('otp', '')
+    input_otp = request.data['otp']
     if user.mobile_verified: 
         return Response(
             {"message": "Mobile Number Already Verified."}, status=status.HTTP_200_OK
@@ -109,7 +106,7 @@ def generate_otp(request, format=None):
         from_= os.environ.get('TWILIO_NUMBER'),
         to = '+91{}'.format(request.user.mobile_no)
     )
-    #print(message.sid)
+    print(message.sid)
     return Response(
             {"message": "Verification OTP send to your registered Mobile Number."}, status=status.HTTP_200_OK
         )
@@ -130,7 +127,7 @@ def add_details(request, format=None):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(['PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def edit_details(request, format=None):
@@ -167,6 +164,33 @@ def show_details(request, format=None):
 
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_money(request, format=None):
+    auth_user = User.objects.get(email=request.user.email)
+    try:
+        user = UserDetail.objects.get(user=auth_user)
+    except UserDetail.DoesNotExist:
+        return Response(
+            {"error": "User doesn't exist in the Database"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if not auth_user.mobile_verified:
+        return Response(
+            {"error": "Mobile Number is not verified, please verify first."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user.account_balance += request.data['amount']
+    user.save()
+    return Response(
+            {"Success": "Money was successfully added in your wallet."},
+            status=status.HTTP_200_OK,
+        )
 
 
 @api_view(["GET"])

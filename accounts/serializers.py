@@ -44,15 +44,13 @@ class UserSerializer(serializers.ModelSerializer):
             "gender",
             "date_of_birth",
             "address",
+            "aadhar_number",
+            "pan_card",
+            "account_balance"
         )
 
 
 class UserDetailProfile(serializers.ModelSerializer):
     class Meta:
         model = UserDetail
-        fields = "__all__"
-
-class UserCompleteProfile(serializers.ModelSerializer):
-    class Meta:
-        model = User
         fields = "__all__"
