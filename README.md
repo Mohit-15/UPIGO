@@ -192,6 +192,7 @@ This application handles Endpoints related to the transactions. These are the op
 	
 The response body contains an **ARRAY** of transactions. The response body clearly shows which is a debit transaction and which is a credit transaction.  Whenever the logged in user receives money from someone, the is_credit field becomes TRUE, and the received from field will be field with the receiver's UPI Id. 
 If it is the debit transaction, the amount will have the prefix **"-"**, and the transfer_to field will be filled.
+
 ### Make Transaction API
 
     POST: http://127.0.0.1:8000/api/user/transactions/makeTransaction/
@@ -285,7 +286,7 @@ After successful creation of **UPI** object, an **QRCode** will also be created,
 
 ### Change UPI PIN API
 
-    POST: http://127.0.0.1:8000/api/user/upi/changeUpiPin/
+    PATCH: http://127.0.0.1:8000/api/user/upi/changeUpiPin/
     headers: {"Bearer": <authentication_token>}
     body: 
     {
@@ -297,7 +298,7 @@ This endpoint will take two fields **PIN1** and **PIN2**. This will change the p
 
 ### Change UPI ID API
 
-    POST: http://127.0.0.1:8000/api/user/upi/changeUpiID/
+    PATCH: http://127.0.0.1:8000/api/user/upi/changeUpiID/
     headers: {"Bearer": <authentication_token>}
     body: 
     {
@@ -305,7 +306,7 @@ This endpoint will take two fields **PIN1** and **PIN2**. This will change the p
 	    "password": "<upi_pin>"
 	}
 	
-This endpoint will change the **UPI ID** associated with the logged in user account.
+This endpoint will change the **UPI ID** associated with the logged in user account, also creates a new encrypted **QR code** for the new UPI ID.
 
 ### Show UPI Details API
 
@@ -344,3 +345,23 @@ The encoded text in the QR Code will look like this:
 > hkgfmiSk9-yzVjM_d2cFJkkbat9MarPPZCzWaxm_i8gLZOSOHhUKZvezH3e1s8M8bisllOXIG-ZkeH7viEWUIKkcA@upigo
 
 Which is then decoded and converted into ***xxxxxxxxxx@upigo***.  For encoding & decoding, I've used ***Symmetric Key Cryptography***.
+
+### Deactivate UPI Object API
+
+    GET: http://127.0.0.1:8000/api/user/upi/deactivateUPI/
+    headers: {"Bearer": <authentication_token>}
+    
+This API call makes the **is_active** field to **FALSE**, and restrict the UPI ID to make any transaction.
+
+### Reactivate UPI Object API
+
+    GET: http://127.0.0.1:8000/api/user/upi/reactivateUPI/
+    headers: {"Bearer": <authentication_token>}
+    
+This API call makes the **is_active** field to **TRUE**, and allow the UPI ID to make any transaction.
+
+<hr/>
+
+> This project is my attempt to implement the entire UPI cycle. This repository may include several problems. Please submit a **pull request**. I'd want to make fresh contributions to assist make this project a huge success and a valuable resource for people interested in learning about FinTech.
+> 
+> Please do like if this repository somehow helped you :)
